@@ -296,52 +296,125 @@ def plot_data():
                     'support_vector'
             })
 
-        # DECISION BOUNDARY
+        # =========================
+        # HYPERPLANE
+        # =========================
+
         decision_boundary = []
 
-        prediction_matrix = predictions.reshape(
-            x1.shape
+        positive_hyperplane = []
+
+        negative_hyperplane = []
+
+        # SVM PARAMETERS
+        w = classifier.coef_[0]
+
+        b = classifier.intercept_[0]
+
+        # X VALUES
+        x_values = np.arange(
+
+            start=x_set[:, 0].min() - 10,
+
+            stop=x_set[:, 0].max() + 10,
+
+            step=1
         )
 
-        rows, cols = prediction_matrix.shape
+        for x_val in x_values:
 
-        for i in range(rows - 1):
+            # SCALE X
+            scaled_x = (
 
-            for j in range(cols - 1):
+                x_val - scaler.mean_[0]
 
-                current_class = (
-                    prediction_matrix[i][j]
-                )
+            ) / scaler.scale_[0]
 
-                right_class = (
-                    prediction_matrix[i][j + 1]
-                )
+            # MAIN HYPERPLANE
+            scaled_y = (
 
-                bottom_class = (
-                    prediction_matrix[i + 1][j]
-                )
+                -(w[0] * scaled_x + b)
 
-                # CLASS CHANGED
-                if (
+                / w[1]
+            )
 
-                    current_class != right_class
+            # POSITIVE HYPERPLANE
+            scaled_y_positive = (
 
-                    or
+                -(w[0] * scaled_x + b - 1)
 
-                    current_class != bottom_class
-                ):
+                / w[1]
+            )
 
-                    decision_boundary.append({
+            # NEGATIVE HYPERPLANE
+            scaled_y_negative = (
 
-                        'age':
-                            float(x1[i][j]),
+                -(w[0] * scaled_x + b + 1)
 
-                        'estimated_salary':
-                            float(x2[i][j]),
+                / w[1]
+            )
 
-                        'boundary_type':
-                            'maximum_margin_hyperplane'
-                    })
+            # INVERSE SCALE
+            y_main = (
+
+                scaled_y * scaler.scale_[1]
+
+            ) + scaler.mean_[1]
+
+            y_positive = (
+
+                scaled_y_positive
+
+                * scaler.scale_[1]
+
+            ) + scaler.mean_[1]
+
+            y_negative = (
+
+                scaled_y_negative
+
+                * scaler.scale_[1]
+
+            ) + scaler.mean_[1]
+
+            # DECISION BOUNDARY
+            decision_boundary.append({
+
+                'age':
+                    float(x_val),
+
+                'estimated_salary':
+                    float(y_main),
+
+                'boundary_type':
+                    'maximum_margin_hyperplane'
+            })
+
+            # POSITIVE HYPERPLANE
+            positive_hyperplane.append({
+
+                'age':
+                    float(x_val),
+
+                'estimated_salary':
+                    float(y_positive),
+
+                'hyperplane_type':
+                    'positive_hyperplane'
+            })
+
+            # NEGATIVE HYPERPLANE
+            negative_hyperplane.append({
+
+                'age':
+                    float(x_val),
+
+                'estimated_salary':
+                    float(y_negative),
+
+                'hyperplane_type':
+                    'negative_hyperplane'
+            })
 
         # RESPONSE
         response = {
@@ -390,6 +463,12 @@ def plot_data():
             'decision_boundary':
                 decision_boundary,
 
+            'positive_hyperplane':
+                positive_hyperplane,
+
+            'negative_hyperplane':
+                negative_hyperplane,
+
             'legend': {
 
                 'salmon':
@@ -402,7 +481,13 @@ def plot_data():
                     'SUPPORT VECTOR',
 
                 'decision_boundary':
-                    'Maximum Margin Hyperplane'
+                    'Maximum Margin Hyperplane',
+
+                'positive_hyperplane':
+                    'Positive Hyperplane',
+
+                'negative_hyperplane':
+                    'Negative Hyperplane'
             }
         }
 
